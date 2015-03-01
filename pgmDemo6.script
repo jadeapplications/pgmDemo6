@@ -1,0 +1,243 @@
+// Copyright (c) 2014 Mimetics Inc.
+// All Rights Reserved
+//
+// THIS SOFTWARE IS PROVIDED BY MIMETICS "AS IS" WITHOUT ANY EXPRESSED OR 
+// IMPLIED WARRANTIES.  IN NO CASE SHALL MIMETICS OR ANY CONTRIBUTORS BE
+// LIABLE IN ANY DAMAGES CAUSED BY THE USE OF THIS SOFTWARE.  
+//
+// FileName: pgmDemo6.script
+// Version : 01.0
+//
+// Author  : myke predko
+//
+// Description: Provide User with the ability to create a simple program on the Jade Robot's UI
+//
+// Release History:
+//  pgmDemo1 - Test Move Functions with Motor Operation
+//           - Taken from "movTst7.script"
+//           - Organized for _Header
+//           - Noticed Problem in execution when you go too far
+//  pgmDemo2 - Update movements to run for an actual 5cm or set distance
+//           - Update movements to turn 45 degrees for each move
+//           - Add spectrometer reading at the end (if desired)
+//           - Check for "Spectro8.s" before executing
+//  pgmDemo3 - New Panel with "arrowicon"
+//           - Commented out "calib" information for debugging
+//  pgmDemo4 - "arrowicon" operation with "calib" restored
+//           - Changed execution to "spectr09.s" for GitHub conventions
+//  pgmDemo5 - Removed "arrowicon" operation and return to pgmDemo2.panel
+//  pgmDemo6 - Fixed instanced of "arrowicon" pgmDemo3.panel in pgmDemo5
+//
+meta("icon",                "pgmDemo1.b");
+meta("description",         "Program Demo:Simple Programming Example");
+//  
+int                         i;
+int                         moveCount = 0;
+int                         _calibTurn;
+int                         _calibLine;
+macro                       MAXMOVES 12
+int                         moveLeft[MAXMOVES];
+int                         moveRite[MAXMOVES];
+str                         bmpString[MAXMOVES];
+str                         reverseBmpString[MAXMOVES];
+str                         panelStatus;
+str                         panelControl = "go";
+str                         moveString;
+str                         _calibFile;
+
+
+    syscall(motorleftset, itos(0));  syscall(motorrightset, itos(0));
+
+    panelStatus = syscall(dir, "_calib.txt");
+    if ("" == (panelStatus = syscall(dirnext, ""))) {
+        syscall(error, "Must have \"_calib.txt\" to operate");
+//                      1234567890123456789012345678901234567890
+    }
+    _calibFile = syscall(fileread, "_calib.txt");
+
+    panelStatus = syscall(dir, "spectr09.s");
+    if ("" == (panelStatus = syscall(dirnext, ""))) {
+        syscall(error, "Must have \"spectr09.s\" to operate");
+//                      1234567890123456789012345678901234567890
+    }
+
+    for (i = _calibTurn = 0; '\r' != _calibFile.i; ++i) 
+    {
+        _calibTurn = (_calibTurn * 10) + _calibFile.i - '0';
+    }
+    for (i += 2, _calibLine = 0; '\r' != _calibFile.i; ++i) 
+    {
+        _calibLine = (_calibLine * 10) + _calibFile.i - '0';
+    }
+
+
+    syscall(motorleftset, "0");  syscall(motorrightset, "0");
+
+    syscall(loadpanelfile, "_exec2.p");
+    syscall(setpanelicon, "tools:pgmDemo1.b");
+    syscall(loadsubpanelfile, "pgmDemo2.p");
+    for (i = 0; MAXMOVES > i; ++i) {
+        for (moveString = itos(i); 2 > len(moveString); moveString = "0" + moveString) {
+        }
+        syscall(setpanelicon, "pgm" + moveString + ":" + (bmpString[i] = "movBLANK.b"));
+    }
+    syscall(setpaneltext, "pgmname:Program Demo");
+    syscall(setpanelvalue, "spectroSelect:0");
+    syscall(setactivepanelcontrol, panelControl);
+    syscall(runpanelfile, "");
+
+    for (;;) {
+
+        for (; "RUN:" == syscall(tostring, "4:" + (panelStatus = syscall(getactivepanelstatus, "")));) {
+        }
+        
+        if ("return" == (panelControl = syscall(fromstring, "4:" + panelStatus))) {
+            syscall(done, "");
+        }
+        else if ("go" == panelControl) {
+            if (0 != moveCount) {
+                syscall(setactivepanelcontrol, panelControl = "go");
+                syscall(runpanelfile, "");
+                for (i = 0; (moveCount > i) && 
+                        ("RUN:" == syscall(tostring, "4:" + syscall(getactivepanelstatus, ""))); 
+                        ++i) {
+                    for (moveString = itos(i); 2 > len(moveString); moveString = "0" + moveString) {
+                    }
+                    syscall(setpanelicon, "pgm" + moveString + ":" + reverseBmpString[i]);
+                    if ((100 == moveLeft[i]) && (100 == moveRite[i]))  //  Moving Forwards
+                    {
+//                        syscall(motorset, "100:100");
+                        if (100 >= _calibLine) {
+                            syscall(motorleftset, itos(_calibLine));  
+                            syscall(motorrightset, itos(100));
+                        }
+                        else {
+                            syscall(motorleftset, itos(100));  
+                            syscall(motorrightset, itos(200 - _calibLine));
+                        }
+//                        syscall(delay, itos(500));
+                        if (0 == i) {
+                            syscall(delay, itos(5 * _calibTurn));
+                        }
+                        else if ((100 == moveLeft[i - 1]) && (100 == moveRite[i - 1])) {  //  Continue 
+                            syscall(delay, itos((425 * _calibTurn * _calibTurn) / 10000));
+                        }
+                        else {
+                            syscall(delay, itos(5 * _calibTurn));
+                        }
+                    }
+                    else if ((-100 == moveLeft[i]) && (-100 == moveRite[i]))  //  Moving Backwards
+                    {
+//                        syscall(motorset, "-100:-100");
+                        if (100 >= _calibLine) {
+                            syscall(motorleftset,  itos(-_calibLine));  
+                            syscall(motorrightset, itos(-100));
+                        }
+                        else {
+                            syscall(motorleftset,  itos(-100));  
+                            syscall(motorrightset, itos(_calibLine - 200));
+                        }
+//                        syscall(delay, itos(500));
+                        if (0 == i) {
+                            syscall(delay, itos(5 * _calibTurn));
+                        }
+                        else if ((-100 == moveLeft[i - 1]) && (-100 == moveRite[i - 1]))  {  //  Continue 
+                            syscall(delay, itos((425 * _calibTurn * _calibTurn) / 10000));
+                        }
+                        else {
+                            syscall(delay, itos(5 * _calibTurn));
+                        }
+                    }
+                    else if (100 == moveLeft[i])  //  Turning Right
+                    {
+//                        syscall(motorset, "100:-100");
+                        if (100 >= _calibLine) {
+                            syscall(motorleftset,  itos(_calibLine));  
+                            syscall(motorrightset, itos(-100));
+                        }
+                        else if (100 < _calibLine) {
+                            syscall(motorleftset,  itos(100));  
+                            syscall(motorrightset, itos(_calibLine - 200));
+                        }
+//                        syscall(delay, itos(500));
+                        syscall(delay, itos((675 * _calibTurn) / 100));
+                    }
+                    else  //  Turning Left
+                    {
+//                        syscall(motorset, "-100:100");
+                        if (100 >= _calibLine) {
+                            syscall(motorleftset,  itos(-100));
+                            syscall(motorrightset, itos(_calibLine));  
+                        }
+                        else if (100 < _calibLine) {
+                            syscall(motorleftset,  itos(_calibLine - 200));
+                            syscall(motorrightset, itos(100));  
+                        }
+//                        syscall(delay, itos(500));
+                        syscall(delay, itos((700 * _calibTurn) / 100));
+                    }
+                    syscall(setpanelicon, "pgm" + moveString + ":" + (bmpString[i] = "movBLANK.b"));
+                }
+                syscall(motorleftset, "0");  syscall(motorrightset, "0");
+                if (i != moveCount) {
+                    syscall(runpanelfile, "");
+                    for (; moveCount > i; ++i) {
+                        for (moveString = itos(i); 2 > len(moveString); moveString = "0" + moveString) {
+                        }
+                        syscall(setpanelicon, "pgm" + moveString + ":" + (bmpString[i] = "movBLANK.b"));
+                    }
+                }
+                else if ("1" == syscall(getpanelvalue, "spectroSelect")) {
+                    syscall(exec, "spectr09.s");  
+                    syscall(loadpanelfile, "_exec2.p");
+                    syscall(setpanelicon, "tools:pgmDemo1.b");
+                    syscall(loadsubpanelfile, "pgmDemo2.p");
+                    for (i = 0; MAXMOVES > i; ++i) {
+                        for (moveString = itos(i); 2 > len(moveString); moveString = "0" + moveString) {
+                        }
+                        syscall(setpanelicon, "pgm" + moveString + ":" + (bmpString[i] = "movBLANK.b"));
+                    }
+                    syscall(setpaneltext, "pgmname:Program Demo");
+                    syscall(setpanelvalue, "spectroSelect:1");
+                    syscall(setactivepanelcontrol, panelControl = "go");
+                    syscall(runpanelfile, "");
+                }
+                moveCount = 0;
+            }
+            else {
+                syscall(runpanelfile, "");
+            }
+        }
+        else if ("spectroSelect:1" == panelControl) {
+            syscall(setpanelvalue, "spectroSelect:" + 
+                    itos(stoi(syscall(getpanelvalue, "spectroSelect")) ^ 1));
+//            i = stoi(syscall(getpanelvalue, "spectroSelect"));
+//            syscall(setpanelvalue, "spectroSelect:" + itos(i ^ 1));
+            syscall(runpanelfile, "");
+        }
+        else {
+            if (MAXMOVES > moveCount) {
+                if ("upArrow" == panelControl) {
+                    bmpString[moveCount] = "movUN.b";         moveLeft[moveCount] = +100;       
+                    reverseBmpString[moveCount] = "movUR.b";  moveRite[moveCount] = +100;
+                }
+                else if ("dnArrow" == panelControl) {
+                    bmpString[moveCount] = "movDN.b";         moveLeft[moveCount] = -100;       
+                    reverseBmpString[moveCount] = "movDR.b";  moveRite[moveCount] = -100;
+                }
+                else if ("ltArrow" == panelControl) {
+                    bmpString[moveCount] = "movLN.b";         moveLeft[moveCount] = -100;       
+                    reverseBmpString[moveCount] = "movLR.b";  moveRite[moveCount] = +100;
+                }
+                else if ("rtArrow" == panelControl) {
+                    bmpString[moveCount] = "movRN.b";         moveLeft[moveCount] = +100;       
+                    reverseBmpString[moveCount] = "movRR.b";  moveRite[moveCount] = -100;
+                }
+                for (moveString = itos(moveCount); 2 > len(moveString); moveString = "0" + moveString) {
+                }
+                syscall(setpanelicon, "pgm" + moveString + ":" + bmpString[moveCount]);
+                ++moveCount;
+            }
+            syscall(runpanelfile, "");
+        }
+    }

@@ -1,0 +1,13 @@
+{
+    "name": "pgmDemo6",
+    "version": "1.0.0",
+    "manifest_version": 1,
+    "project_type": "application",
+    "executable_type": "c",
+    "executable": "pgmDemo6.script",
+    "author": "myke predko",
+    "minimum_firmware_version": 40,
+    "dependencies": [
+        "jadeapplications/stdPanelOutline"
+    ]
+}

@@ -1,0 +1,28 @@
+#  pgmDemo1 - Subpanel 
+#           - Taken from "movTst6.panel"
+#  pgmDemo2 - Move Arrows to left
+#           - Add Radio Button for Spectrometer
+
+dimensions  = 102, 53;
+
+icon        = go,       movGO.bmp,    0,   21, 16,   9,  9,    stop,   show, rounded;
+icon        = upArrow,  movUA.bmp,    0,   21,  0,   9, 16,    stop,   show, rounded;
+icon        = dnArrow,  movDA.bmp,    0,   21, 25,   9, 16,    stop,   show, rounded;
+icon        = ltArrow,  movLA.bmp,    0,    5, 16,  16,  9,    stop,   show, rounded;
+icon        = rtArrow,  movRA.bmp,    0,   30, 16,  16,  9,    stop,   show, rounded;
+
+icon        = pgm00,    movLN.bmp,    0,    2, 41,   7, 12,  nostop,   show, rounded;
+icon        = pgm01,    movLN.bmp,    0,   10, 41,   7, 12,  nostop,   show, rounded;
+icon        = pgm02,    movLN.bmp,    0,   18, 41,   7, 12,  nostop,   show, rounded;
+icon        = pgm03,    movLN.bmp,    0,   26, 41,   7, 12,  nostop,   show, rounded;
+icon        = pgm04,    movLN.bmp,    0,   34, 41,   7, 12,  nostop,   show, rounded;
+icon        = pgm05,    movLN.bmp,    0,   42, 41,   7, 12,  nostop,   show, rounded;
+icon        = pgm06,    movLN.bmp,    0,   50, 41,   7, 12,  nostop,   show, rounded;
+icon        = pgm07,    movLN.bmp,    0,   58, 41,   7, 12,  nostop,   show, rounded;
+icon        = pgm08,    movLN.bmp,    0,   66, 41,   7, 12,  nostop,   show, rounded;
+icon        = pgm09,    movLN.bmp,    0,   74, 41,   7, 12,  nostop,   show, rounded;
+icon        = pgm10,    movLN.bmp,    0,   82, 41,   7, 12,  nostop,   show, rounded;
+icon        = pgm11,    movLN.bmp,    0,   90, 41,   7, 12,  nostop,   show, rounded;
+
+icon        = spectro,  Spectro9.bmp, 0,   60, 12,  24, 16,  nostop,   show, rounded;
+radiobutton = spectroSelect,               66, 28,  10, 10,            stop,   show;
